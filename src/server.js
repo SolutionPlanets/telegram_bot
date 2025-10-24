@@ -8,10 +8,9 @@ app.use(bodyParser.json());
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token);
-//const webhookUrl = `${process.env.GCP_URL}/bot${token}`;
-
-// Set webhook URL
-//bot.setWebHook(webhookUrl);
+const webhookUrl = `${process.env.CLOUD_RUN_SERVICE_URL}/bot${token}`;
+const bot = new TelegramBot(token, { webHook: { port: PORT } });
+bot.setWebHook(webhookUrl);
 
 // Webhook endpoint
 app.post(`/bot${token}`, (req, res) => {
@@ -42,4 +41,5 @@ bot.on('message', (msg) => {
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
