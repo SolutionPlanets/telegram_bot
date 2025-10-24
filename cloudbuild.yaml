@@ -18,8 +18,7 @@ steps:
       - --region=us-central1
       - --platform=managed
       - --allow-unauthenticated
-      - --set-secrets
-      - TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
+      - --update-secrets=TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
 
 images:
   - gcr.io/$PROJECT_ID/solution-planets-bot
