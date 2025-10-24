@@ -1,0 +1,25 @@
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/solution-planets-bot', '.']
+
+  # Push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/solution-planets-bot']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - solution-planets-bot
+      - --image=gcr.io/$PROJECT_ID/solution-planets-bot
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-secrets
+      - TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
+
+images:
+  - gcr.io/$PROJECT_ID/solution-planets-bot
