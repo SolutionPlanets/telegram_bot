@@ -6,29 +6,35 @@ steps:
   # Push Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}']
-
-  # Deploy to Cloud Run
+    
+  # Deploy to Cloud Run (initial deployment)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_SERVICE_NAME}
+      - --region=${_DEPLOY_REGION}
+      - --platform=${_PLATFORM}
+      - --allow-unauthenticated
+      - --update-secrets=TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
+      
+  # Get service URL and update environment variable
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: bash
     args:
       - '-c'
       - |
-        gcloud run deploy ${_SERVICE_NAME} \
-          --image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_SERVICE_NAME} \
-          --region=${_DEPLOY_REGION} \
-          --platform=${_PLATFORM} \
-          --allow-unauthenticated \
-          --update-secrets=TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
-        
-        # Get the service URL
-        SERVICE_URL=$(gcloud run services describe ${_SERVICE_NAME} \
+        SERVICE_URL=$$(gcloud run services describe ${_SERVICE_NAME} \
           --region=${_DEPLOY_REGION} \
           --format='value(status.url)')
-        
-        # Update with the service URL
+          
+          echo "Service URL: $$SERVICE_URL"
+          
         gcloud run services update ${_SERVICE_NAME} \
           --region=${_DEPLOY_REGION} \
-          --set-env-vars=CLOUD_RUN_SERVICE_URL=$SERVICE_URL
+          --update-env-vars=CLOUD_RUN_SERVICE_URL=$$SERVICE_URL
 images:
   - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}'
 options:
