@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
 const questions = require('./questions');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 app.use(bodyParser.json());
@@ -63,7 +64,7 @@ bot.onText(/\/start/, (msg) => {
       one_time_keyboard: true
     }
   };
-  bot.sendMessage(chatId, "👋 Welcome to Solution Planets! Choose a question:", options);
+  bot.sendMessage(chatId, "👋 Welcome to Solution Planets! Choose a question or ask anything:", options);
 });
 
 // Handle all messages
@@ -91,6 +92,7 @@ bot.on('message', async (msg) => {
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
