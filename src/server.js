@@ -7,8 +7,10 @@ const app = express();
 app.use(bodyParser.json());
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token);
+const PORT = process.env.PORT || 8080;
 const webhookUrl = `${process.env.CLOUD_RUN_SERVICE_URL}/bot${token}`;
+
+// Initialize bot with webhook configuration
 const bot = new TelegramBot(token, { webHook: { port: PORT } });
 bot.setWebHook(webhookUrl);
 
@@ -31,15 +33,28 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, "👋 Welcome to Solution Planets! Choose a question:", options);
 });
 
+// Handle all messages
 bot.on('message', (msg) => {
+  // Ignore /start command as it's already handled
+  if (msg.text === '/start') return;
+  
   const chatId = msg.chat.id;
-  const question = questions.find(q => q.question === msg.text);
+  const userMessage = msg.text;
+  const question = questions.find(q => q.question === userMessage);
   if (question) {
     bot.sendMessage(chatId, question.answer);
+  }else {
+    // Send typing indicator
+    bot.sendChatAction(chatId, 'typing');
+    
+    // Get AI-generated response for non-predefined questions
+    //const aiResponse = await getAIResponse(userMessage);
+    bot.sendMessage(chatId, 'I am not trained to answer this question yet. Our experts at Solution Planets can help you.');
   }
 });
 
-const PORT = process.env.PORT || 8080;
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
